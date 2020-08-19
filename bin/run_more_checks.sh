@@ -6,6 +6,7 @@ export OMP_NUM_THREADS=2
 if [ ! -f ~/.R/Makevars ]; then
     mkdir -p ~/.R
     echo "CXX = g++ -std=c++11 -Wall -pedantic  " > ~/.R/Makevars
+    echo "CXXFLAGS = -O3  " >> ~/.R/Makevars
 fi
 
 make test-tmb_syntax

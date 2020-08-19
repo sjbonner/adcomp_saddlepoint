@@ -4,6 +4,7 @@ set -e # Exit with nonzero exit code if anything fails
 if [ ! -f ~/.R/Makevars ]; then
     mkdir -p ~/.R
     echo "CXX = g++ -std=c++11 -Wall -pedantic  " > ~/.R/Makevars
+    echo "CXXFLAGS = -O3  " >> ~/.R/Makevars
 fi
 
 make cran-version
