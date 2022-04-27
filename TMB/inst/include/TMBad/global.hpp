@@ -383,6 +383,7 @@ struct ReverseArgs<bool> : Args<> {
   /** \brief Helper */
   template <class Operator>
   bool any_marked_output(const Operator &op) {
+    if (Operator::elimination_protected) return true;
     Index noutput = op.output_size();
     for (Index j = 0; j < noutput; j++)
       if (y(j)) return true;
@@ -771,6 +772,7 @@ struct global {
       bool independent_variable;
       bool dependent_variable;
       bool allow_remap;
+      bool elimination_protected;
     };
     /** \brief Get operator info. */
     virtual op_info info() = 0;
@@ -1414,6 +1416,8 @@ struct global {
     static const bool is_linear = false;
     /** \brief Is this operator a 'smart pointer' (with reference counting) ? */
     static const bool smart_pointer = false;
+    /** \brief Protect this operator from elimination by the tape optimizer ? */
+    static const bool elimination_protected = false;
     /** \brief How to fuse this operator (self) with another (other) */
     OperatorPure *other_fuse(OperatorPure *self, OperatorPure *other) {
       return NULL;
@@ -2179,6 +2183,7 @@ struct global {
       info.dependent_variable = Op.dependent_variable;
       info.allow_remap = Op.allow_remap;
       info.is_linear = Op.is_linear;
+      info.elimination_protected = Op.elimination_protected;
 
       return info;
     }
@@ -3519,6 +3524,33 @@ ad_plain CondExpLe(const ad_plain &x0, const ad_plain &x1, const ad_plain &x2,
                    const ad_plain &x3);
 ad_aug CondExpLe(const ad_aug &x0, const ad_aug &x1, const ad_aug &x2,
                  const ad_aug &x3);
+
+template <class Info>
+struct InfoOp : global::DynamicOperator<-1, 0> {
+  Index n;
+  Info info;
+  InfoOp(Index n, Info info) : n(n), info(info) {}
+  static const bool elimination_protected = true;
+  static const bool add_forward_replay_copy = true;
+  static const bool have_input_size_output_size = true;
+  template <class Type>
+  void forward(ForwardArgs<Type> &args) {}
+  template <class Type>
+  void reverse(ReverseArgs<Type> &args) {}
+  Index input_size() const { return n; }
+  Index output_size() const { return 0; }
+  const char *op_name() { return "InfoOp"; }
+  void print(global::print_config cfg) {
+    Rcout << cfg.prefix << info << std::endl;
+  }
+  void *operator_data() { return &info; }
+};
+template <class Info>
+void addInfo(const std::vector<ad_aug> &x, const Info &info) {
+  global::Complete<InfoOp<Info> >(x.size(), info)(x);
+}
+template <class Info>
+void addInfo(const std::vector<double> &x, const Info &info) {}
 
 struct SumOp : global::DynamicOperator<-1, 1> {
   static const bool is_linear = true;

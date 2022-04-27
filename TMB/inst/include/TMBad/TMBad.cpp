@@ -1285,8 +1285,10 @@ void global::extract_sub_inplace(std::vector<bool> marks) {
   std::vector<bool> opstack_deallocate(opstack.size(), false);
 
   for (size_t i = 0; i < opstack.size(); i++) {
+    OperatorPure::op_info info = opstack[i]->info();
+
     size_t nout = opstack[i]->output_size();
-    bool any_marked_output = false;
+    bool any_marked_output = info.elimination_protected;
     for (size_t j = 0; j < nout; j++) {
       any_marked_output |= args.y(j);
     }
