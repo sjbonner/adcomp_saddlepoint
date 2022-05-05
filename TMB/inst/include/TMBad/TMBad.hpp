@@ -214,6 +214,9 @@ struct ADFun {
   /** \brief Print AD workspace */
   void print(print_config cfg = print_config()) { glob.print(cfg); }
 
+  /** \brief Dead operator elimination */
+  void eliminate() { glob.eliminate(); }
+
   /** \brief Tape optimizer
       \details Does the following two steps
       1. Identical sub-expressions a remapped to their first occurance
@@ -1134,6 +1137,19 @@ struct ADFun {
     outer_mask = subset(outer_mask, inv_keep);
     glob.inv_index = subset(glob.inv_index, inv_keep);
     set_inner_outer(*this, outer_mask);
+  }
+  /** \brief Substitute selected operators by void operators
+      \param nodes Selected operator nodes
+      \details This function was added as a way to get rid of protected
+     operators.
+  */
+  void inactivate(std::vector<Index> nodes) {
+    for (size_t i = 0; i < nodes.size(); i++) {
+      OperatorPure *op = glob.opstack[nodes[i]];
+      glob.opstack[nodes[i]] = glob.getOperator<global::NullOp2>(
+          op->input_size(), op->output_size());
+      op->deallocate();
+    }
   }
 };
 
