@@ -958,6 +958,8 @@ struct ADFun {
      composition f(g(x)).
   */
   ADFun compose(ADFun other) {
+    TMBAD_ASSERT2(other.Range() == this->Domain(),
+                  "Compostion of incompatible functions");
     struct composition {
       const ADFun &f;
       const ADFun &g;
