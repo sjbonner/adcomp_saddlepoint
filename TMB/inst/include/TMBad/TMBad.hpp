@@ -953,6 +953,20 @@ struct ADFun {
     return marginal_sr(random, std::vector<sr_grid>(1, grid),
                        std::vector<Index>(0));
   }
+  /** \brief Construct function composition
+      \details Given this function (f) and another function (g) construct the
+     composition f(g(x)).
+  */
+  ADFun compose(ADFun other) {
+    struct composition {
+      const ADFun &f;
+      const ADFun &g;
+      composition(const ADFun &f, const ADFun &g) : f(f), g(g) {}
+      std::vector<ad> operator()(std::vector<ad> x) { return f(g(x)); }
+    };
+    composition fg(*this, other);
+    return ADFun(fg, other.DomainVec());
+  }
   /** \brief Decompose this computational graph
       \note This function preserves the inner/outer parameter categories if in
      use.
