@@ -237,6 +237,7 @@ MakeADFun <- function(data, parameters, map=list(),
                       profile=NULL,
                       random.start=expression(last.par.best[random]),
                       hessian=FALSE,method="BFGS",
+                      saddlepoint = FALSE,
                       inner.method="newton",
                       inner.control=list(maxit=1000),
                       MCcontrol=list(doMC=FALSE,seed=123,n=100),
@@ -695,11 +696,15 @@ MakeADFun <- function(data, parameters, map=list(),
     res
   } ## end{ f }
 
-  h <- function(theta=par, order=0, hessian, L, ...) {
+  h <- function(theta=par, order=0, hessian, L, saddlepoint,...) {
     if(order == 0) {
       ##logdetH <- determinant(hessian)$mod
       logdetH <- 2*determinant(L)$mod
-      ans <- -f(theta,order=0) + .5*logdetH + length(random)/2*log(2*pi)
+      if(saddlepoint)
+        ans <- -f(theta,order=0) + .5*logdetH + length(random)/2*log(2*pi)
+      else
+        ans <- f(theta,order=0) + .5*logdetH - length(random)/2*log(2*pi)
+        
       if(LaplaceNonZeroGradient){
         grad <- f(theta,order=1)[random]
         ans - .5* sum(grad * as.numeric( solveCholesky(L, grad) ))
@@ -772,10 +777,16 @@ MakeADFun <- function(data, parameters, map=list(),
       ## Reverse mode evaluate ptr in rangedirection w
       ## now gives .5*tr(Hdot*Hinv) !!
       ## return
-      (-1) * as.vector( f(theta,order=1) ) +
-          EvalADFunObject(e$ADHess, theta,
-                          order=1,
-                          rangeweight=w)
+      if(saddlepoint)
+        return((-1) * as.vector( f(theta,order=1) ) +
+                 EvalADFunObject(e$ADHess, theta,
+                                 order=1,
+                                 rangeweight=w))
+      else
+        return(as.vector( f(theta,order=1) ) +
+                 EvalADFunObject(e$ADHess, theta,
+                                 order=1,
+                                 rangeweight=w))
     }## order == 1
     else stop(sprintf("'order'=%d not yet implemented", order))
   } ## end{ h }
@@ -843,7 +854,7 @@ MakeADFun <- function(data, parameters, map=list(),
       L <- Cholesky(hessian,perm=TRUE,LDL=FALSE,super=TRUE)
 
     if(order==0){
-      res <- h(par,order=0,hessian=hessian,L=L)
+      res <- h(par,order=0,hessian=hessian,L=L,saddlepoint = saddlepoint)
       ## Profile case correction
       if(!is.null(profile)){
           res <- res + sum(profile)/2*log(2*pi)
@@ -857,7 +868,7 @@ MakeADFun <- function(data, parameters, map=list(),
     if(order==1){
       #hess <- f(par,order=2,cols=random)
       #hess <- spHess(par)##[,random,drop=FALSE]
-      grad <- h(par,order=1,hessian=hessian,L=L)
+      grad <- h(par,order=1,hessian=hessian,L=L,saddlepoint = saddlepoint)
       #res <- grad[-random] - t(grad[random])%*%solve(hess[random,random])%*%hess[random,-random]
       #res <- grad[-random] - t(grad[random])%*%solve(hess[random,])%*%t(hess[-random,])
 

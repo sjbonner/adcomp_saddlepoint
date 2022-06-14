@@ -30,7 +30,13 @@ checkMatrixPackageVersion <- function() {
 }
 
 .onLoad <- function(lib, pkg) {
-    library.dynam("TMB", pkg, lib)
+  message("******************************")
+  message("Note: this is a modified version of TMB that implements the saddlepoint approximation.")
+  message("The saddlepoint approximation is invoked by setting the argument saddlepoint = TRUE in the call to MakeADFun.")
+  message("This _should_ not affect other analyses performed with the functions in this package.")
+  message("******************************")
+  
+  library.dynam("TMB", pkg, lib)
     checkMatrixPackageVersion()
     ## Select AD framework (CppAD or TMBad) used by TMB::compile
     tmb.ad.framework <- getOption("tmb.ad.framework", NULL)
