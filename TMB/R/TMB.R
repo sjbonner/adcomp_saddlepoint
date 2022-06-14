@@ -699,7 +699,7 @@ MakeADFun <- function(data, parameters, map=list(),
     if(order == 0) {
       ##logdetH <- determinant(hessian)$mod
       logdetH <- 2*determinant(L)$mod
-      ans <- f(theta,order=0) + .5*logdetH - length(random)/2*log(2*pi)
+      ans <- -f(theta,order=0) + .5*logdetH + length(random)/2*log(2*pi)
       if(LaplaceNonZeroGradient){
         grad <- f(theta,order=1)[random]
         ans - .5* sum(grad * as.numeric( solveCholesky(L, grad) ))
@@ -772,7 +772,7 @@ MakeADFun <- function(data, parameters, map=list(),
       ## Reverse mode evaluate ptr in rangedirection w
       ## now gives .5*tr(Hdot*Hinv) !!
       ## return
-      as.vector( f(theta,order=1) ) +
+      (-1) * as.vector( f(theta,order=1) ) +
           EvalADFunObject(e$ADHess, theta,
                           order=1,
                           rangeweight=w)
