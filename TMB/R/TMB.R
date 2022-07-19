@@ -217,26 +217,28 @@ parseIntegrate <- function(arg, name) {
 ##' @param random.start Expression defining the strategy for choosing random effect initial values as function of previous function evaluations - see details.
 ##' @param hessian Calculate Hessian at optimum?
 ##' @param method Outer optimization method.
+##' @param saddlepoint Compute saddlepoint approximation?
 ##' @param inner.method Inner optimization method (see function "newton").
 ##' @param inner.control List controlling inner optimization.
 ##' @param MCcontrol List controlling importance sampler (turned off by default).
 ##' @param ADreport Calculate derivatives of macro ADREPORT(vector) instead of objective_function return value?
 ##' @param atomic Allow tape to contain atomic functions?
 ##' @param LaplaceNonZeroGradient Allow Taylor expansion around non-stationary point?
+##' @param ... Currently unused.
 ##' @param DLL Name of shared object file compiled by user (without the conventional extension, \file{.so}, \file{.dll}, \dots).
 ##' @param checkParameterOrder Optional check for correct parameter order.
 ##' @param regexp Match random effects by regular expressions?
 ##' @param silent Disable all tracing information?
 ##' @param intern Do Laplace approximation on C++ side ? See details (Experimental - may change without notice)
 ##' @param integrate Specify alternative integration method(s) for random effects (see details)
-##' @param ... Currently unused.
 ##' @return List with components (fn, gr, etc) suitable for calling an R optimizer, such as \code{nlminb} or \code{optim}.
 MakeADFun <- function(data, parameters, map=list(),
                       type=c("ADFun","Fun","ADGrad"[!intern && (!is.null(random) || !is.null(profile)) ] ),
                       random=NULL,
                       profile=NULL,
                       random.start=expression(last.par.best[random]),
-                      hessian=FALSE,method="BFGS",
+                      hessian=FALSE,
+                      method="BFGS",
                       saddlepoint = FALSE,
                       inner.method="newton",
                       inner.control=list(maxit=1000),
