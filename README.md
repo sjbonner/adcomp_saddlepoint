@@ -1,7 +1,19 @@
-Template Model Builder (TMB)
+Template Model Builder (TMB) + SPA
 ============================
 
-[![Build Status](https://travis-ci.org/kaskr/adcomp.svg?branch=master)](https://travis-ci.org/kaskr/adcomp)
+Note: this is a modified version of TMB that implements the saddlepoint approximation. The saddlepoint approximation is invoked by setting the argument saddlepoint = TRUE in the call to MakeADFun. This _should_ not affect other analyses performed with the functions in this package.
+
+You can install this version of the package by installing the devtools package and then running the following commands in R:
+
+```R
+library(devtools)
+install_github("sjbonner/adcomp_saddlepoint/TMB")
+```
+
+The remainder of this document is copied directly for the README file for the main version of TMB. 
+
+Template Model Builder (TMB)
+============================
 
 TMB is an R package with functionality similar to ADMB.
 It requires R at least version 3.0.0 and development tools needed to install R packages from source.
